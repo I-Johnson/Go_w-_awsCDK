@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsdynamodb"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/constructs-go/constructs/v10"
@@ -12,6 +13,12 @@ type GoCdkStackProps struct {
 	awscdk.StackProps
 }
 
+// NewGoCdkStack creates a new AWS CDK stack with a DynamoDB table, a Lambda function, and an API Gateway.
+//
+// The scope parameter is the scope in which to create the stack.
+// The id parameter is the ID of the stack.
+// The props parameter is the properties of the stack.
+// Returns the newly created stack.
 func NewGoCdkStack(scope constructs.Construct, id string, props *GoCdkStackProps) awscdk.Stack {
 	var sprops awscdk.StackProps
 	if props != nil {
@@ -35,6 +42,27 @@ func NewGoCdkStack(scope constructs.Construct, id string, props *GoCdkStackProps
 	})
 
 	table.GrantReadWriteData(myFunction)
+
+	api := awsapigateway.NewRestApi(stack, jsii.String("myAPIGateway"), &awsapigateway.RestApiProps{
+		DefaultCorsPreflightOptions: &awsapigateway.CorsOptions{
+			AllowHeaders: jsii.Strings("Content-Type", "Authorization"),
+			AllowMethods: jsii.Strings("GET", "POST", "DELETE", "PUT", "OPTIONS"),
+			AllowOrigins: jsii.Strings("*"),
+		},
+		DeployOptions: &awsapigateway.StageOptions{
+			LoggingLevel: awsapigateway.MethodLoggingLevel_INFO,
+		},
+	})
+
+	integration := awsapigateway.NewLambdaIntegration(myFunction, nil)
+
+	// Define the routes
+	registerResource := api.Root().AddResource(jsii.String("register"), nil)
+	registerResource.AddMethod(jsii.String("POST"), integration, nil)
+
+	// Define the routes
+	loginResource := api.Root().AddResource(jsii.String("login"), nil)
+	loginResource.AddMethod(jsii.String("POST"), integration, nil)
 
 	return stack
 }
