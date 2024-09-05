@@ -1,8 +1,12 @@
-# Welcome to your CDK Go project!
+# GO with AWS
 
-This is a blank project for CDK development with Go.
+I explored deploying Go Services on AWS infrastructure using AWS CDK. I used AWS Lambda, API Gateway, CloudWatch and Cloud Formation to create 3 endpoints: Register, Login and Access through Protected route. I used JWT to validate the users. 
 
-The `cdk.json` file tells the CDK toolkit how to execute your app.
+
+![alt text](image.png)
+![alt text](image-1.png)
+![alt text](image-2.png)
+
 
 ## Useful commands
 
